@@ -1,0 +1,51 @@
+/* Heatmap grid: week columns, weekday rows. Cell colours come from inline styles set in js/heatmap.js. */
+
+.heat { --phone-weeks: 28; } /* = TWO_COLUMN_MAX_WEEKS in js/config.js */
+
+.grid { display: grid; gap: 4px; }
+.heat-stacked .grid { gap: 3px; }
+.mlabel, .dlabel { font-family: var(--mono); font-size: 11px; color: var(--label); }
+.mlabel { white-space: nowrap; overflow: visible; }
+.dlabel { align-self: center; height: 0; display: flex; align-items: center; white-space: nowrap; } /* zero height: label text must not stretch its row beyond the cell size */
+
+.cell { aspect-ratio: 1; border-radius: 3px; }
+.heat-stacked .cell { border-radius: 2px; }
+.cell.blank { background: transparent; }
+.cell.star { clip-path: none; } /* the star is its inner span (heatmap.js), so the cell keeps a square outline */
+.cell.star > span { display: block; width: 100%; height: 100%; transform: scale(1.25); }
+
+.dcol { display: none; } /* phones only, below */
+
+/* Phones: long horizons keep the cell size of the widest un-scrolled view (--phone-weeks weeks)
+   and pan sideways instead of shrinking. The day labels stay put: the grid's own are hidden, and a copy (.dcol)
+   sits over the scroller's left edge, outside it, so neither panning nor the overscroll stretch moves them. */
+@media (max-width: 700px) {
+  /* the wrapper is the size container, so the scroller's cells and the label column share one cell size */
+  .heat-stacked .hwrap { position: relative; container-type: inline-size; }
+  .heat-stacked .grid, .heat-stacked .dcol { --cw: calc((100cqw - 36px - var(--phone-weeks) * 4px) / var(--phone-weeks)); }
+  /* overflow-y hidden: with overflow-x auto it would compute to auto, and race stars poking past the grid would let
+     the strip nudge up and down while panning. It clips no more than auto does; vertical swipes still scroll the page. */
+  .heat-stacked .hscroll { overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; }
+  .heat-stacked .hscroll::-webkit-scrollbar { display: none; }
+  .heat-stacked .grid {
+    grid-template-columns: 36px repeat(var(--weeks), var(--cw)) !important; max-width: none !important;
+    width: max-content; gap: 4px; padding-right: 14px;
+  }
+  .heat-stacked .cell { border-radius: 3px; }
+  .heat-stacked .grid > .dlabel { visibility: hidden; } /* keeps its column; .dcol shows the labels */
+  /* rows match the grid's: the month row (same font, so same height), then seven cell-sized rows, same gap. Opaque,
+     4px wider than its column, so cells panning beneath it are covered up to the first week's column. */
+  .heat-stacked .dcol {
+    display: grid; grid-template-rows: auto repeat(7, var(--cw)); gap: 4px;
+    position: absolute; top: 0; left: 0; width: 36px; z-index: 1;
+    background: var(--bg); box-shadow: 4px 0 0 var(--bg); pointer-events: none;
+  }
+  /* while earlier weeks are off to the left (.more-left, set in js/heatmap.js), cells fade into the day column: a
+     hint that the strip pans. Gone at the earliest week. */
+  .heat-stacked .dcol::after {
+    content: ""; position: absolute; top: 0; bottom: 0; left: calc(100% + 4px); width: 20px;
+    background: linear-gradient(to right, var(--bg), transparent); opacity: 0; transition: opacity .2s ease;
+  }
+  .heat-stacked .more-left .dcol::after { opacity: 1; }
+}
+@media (max-width: 700px) and (prefers-reduced-motion: reduce) { .heat-stacked .dcol::after { transition: none; } }

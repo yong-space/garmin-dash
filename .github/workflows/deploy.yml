@@ -1,0 +1,27 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'sync/**'
+      - 'api/**'
+      - 'web/**'
+      - 'deploy.sh'
+      - 'k8s/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: on-prem
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    - name: Deploy (code ConfigMaps, manifests, restart, wait for rollout)
+      run: ./deploy.sh

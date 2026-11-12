@@ -1,0 +1,136 @@
+# One pod, one container, sharing the cache volume:
+#   sync  a command run every REFRESH_SECONDS that fetches from Garmin into /data/garmin_cache.json
+#   api   serves the cache as JSON at /api/* and the frontend (web/) at /, on :8080
+# The code is mounted from five ConfigMaps (garmin-dash-sync, -api, -web, -web-css, -web-js) that deploy.sh
+# builds from the source directories; it applies this file and restarts the pod. Deploy with ./deploy.sh.
+# Nothing here exposes it outside the cluster: add your own ingress (k8s/*.local.yaml is applied too, and gitignored).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: garmin-dash-data
+  namespace: default
+  labels:
+    app: garmin-dash
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: garmin-dash
+  namespace: default
+  labels:
+    app: garmin-dash
+spec:
+  replicas: 1
+  # Recreate: the old pod stops before the new one starts, because a ReadWriteOnce volume can only attach to one node,
+  # so a deploy is down for a few seconds (the new pod's API answers at once: the cache is already on the volume).
+  # If your volume mounts on several nodes at once (ReadWriteMany, e.g. NFS), you can deploy with no downtime instead:
+  #   strategy: {type: RollingUpdate, rollingUpdate: {maxSurge: 1, maxUnavailable: 0}}
+  # Two pods at once are safe: their syncs take turns on the cache lock, saves are atomic renames, and the API only
+  # reads. (On NFS, the lock holds across nodes with NFSv4 locks, i.e. without the local_lock mount option.)
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: garmin-dash
+  template:
+    metadata:
+      labels:
+        app: garmin-dash
+    spec:
+      containers:
+        - name: garmin-dash
+          image: python:3.12-slim
+          workingDir: /app
+          command: [sh, -c]
+          args:
+            - |
+              # sync once every REFRESH_SECONDS in the background (a failed run is logged; the previous cache
+              # stays); the api, which also serves the frontend, runs in the foreground so the container lives
+              # and dies with it.
+              while true; do
+                python -u -m sync --cache /data/garmin_cache.json || echo "sync failed"
+                sleep "$REFRESH_SECONDS"
+              done &
+              exec python -u -m api --cache /data/garmin_cache.json --lactate-threshold /data/lactate_threshold.csv --static /srv/www --host 0.0.0.0 --port 8080
+          env:
+            - name: REFRESH_SECONDS
+              value: "3600"
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: GARMIN_PERSONAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: garmin-key
+                  key: GARMIN_KEY
+          ports:
+            - name: http
+              containerPort: 8080
+          lifecycle:
+            preStop:  # keep serving while the proxy stops routing here; then SIGTERM, which the API exits on at once
+              exec:
+                command: [sleep, "3"]
+          readinessProbe:  # ready once the first sync has written the cache
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 96Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          volumeMounts:
+            - name: sync-code
+              mountPath: /app/sync
+            - name: api-code
+              mountPath: /app/api
+            - name: web-root
+              mountPath: /srv/www/index.html
+              subPath: index.html
+            - name: web-css
+              mountPath: /srv/www/css
+            - name: web-js
+              mountPath: /srv/www/js
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: sync-code
+          configMap:
+            name: garmin-dash-sync
+        - name: api-code
+          configMap:
+            name: garmin-dash-api
+        - name: web-root
+          configMap:
+            name: garmin-dash-web
+        - name: web-css
+          configMap:
+            name: garmin-dash-web-css
+        - name: web-js
+          configMap:
+            name: garmin-dash-web-js
+        - name: data
+          persistentVolumeClaim:
+            claimName: garmin-dash-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: garmin-dash
+  namespace: default
+  labels:
+    app: garmin-dash
+spec:
+  selector:
+    app: garmin-dash
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

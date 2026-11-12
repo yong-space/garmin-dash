@@ -1,0 +1,81 @@
+/* Every colour on the page, for both themes. The theme is data-theme on <html>: set before first paint by the
+   script in index.html (the saved choice, else the device's preference) and switched by js/theme.js. Charts use
+   these through var() (js/config.js), so switching theme is instant, with no redraw. */
+
+:root {
+  color-scheme: light;
+  --bg: #fafaf7;
+  --ink: #161616;
+  --muted: #8a8a85;
+  --label: #6b6b66;
+  --empty: #ebebe7;    /* days without data, toggle track */
+  --gridline: #e4e4df;
+  --raised: #fff;      /* the pressed toggle button */
+  --shadow: rgba(0, 0, 0, .12);
+  --error: #c9402f;
+  --tip-bg: rgba(22, 22, 22, .78);
+  --tip-ink: #fff;
+  --tip-date: #dcdcd6;
+  --tip-shadow: rgba(0, 0, 0, .16);
+  --hit: rgba(0, 0, 0, .06);        /* the active point's band on line charts */
+  --hit-pinned: rgba(0, 0, 0, .1);
+
+  /* Heatmap scales, lightest (low) to darkest (high); line charts use step 2 (LINE_STEP in js/config.js). */
+  --green-0: #b5e3b5; --green-1: #7bcc80; --green-2: #43a55a; --green-3: #237a3c; --green-4: #0f4a24;
+  --purple-0: #ddd7fa; --purple-1: #b9adf2; --purple-2: #8f7fe3; --purple-3: #6a55cf; --purple-4: #4329a6;
+  --blue-0: #c9dffa; --blue-1: #94c0f2; --blue-2: #5d9ae2; --blue-3: #2f6fc4; --blue-4: #123f86;
+  --red-0: #fcd5d0; --red-1: #f5a59b; --red-2: #e8705f; --red-3: #c9402f; --red-4: #8c1d12;
+  --teal-0: #c4ebe6; --teal-1: #8fd6cd; --teal-2: #52b9ae; --teal-3: #2a8c83; --teal-4: #125953;
+  --orange-0: #fde0c2; --orange-1: #f9bd85; --orange-2: #f09a4a; --orange-3: #d97a1c; --orange-4: #9a4d08;
+
+  /* weekly run line: a step more prominent than LINE_STEP, so it leads the strength line (1.5x its contrast) */
+  --run-line: #237a3c;
+  /* light pink: lighter and softer than the runs, so it supports them without competing */
+  --strength: #f0a7d0;
+  /* Run types: an effort-temperature scale. Base is cool teal (a shade darker than the others: keeps it apart from
+     strength for colour-blind readers), tempo warm amber, intervals red-hot crimson; long is blue, the endurance
+     outlier. Validated as a set (every pair, with race and strength) for colour-blind and normal-vision separation.
+     Race is the most saturated colour so race days stand out; its one close pair, long vs race, is covered by races
+     always carrying a star, so they never rely on colour alone. */
+  --run-base: #0f9b89;
+  --run-tempo: #f1903a;
+  --run-intervals: #c9434a;
+  --run-long: #418eee;
+  --race: #9c45fd;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #141413;
+  --ink: #ebebe6;
+  --muted: #7a7a74;
+  --label: #96968f;
+  --empty: #262624;
+  --gridline: #2b2b29;
+  --raised: #3a3a37;
+  --shadow: rgba(0, 0, 0, .5);
+  --error: #f07a6a;
+  --tip-bg: rgba(58, 58, 55, .88);
+  --tip-ink: #fff;
+  --tip-date: #dcdcd6;
+  --tip-shadow: rgba(0, 0, 0, .5);
+  --hit: rgba(255, 255, 255, .07);
+  --hit-pinned: rgba(255, 255, 255, .12);
+
+  /* The same scales reversed: on a dark page, low values are dim and high values bright. Adjacent steps keep exactly
+     the light scales' contrast, and step 0 stands further apart from empty days than it does in light mode. Step 2,
+     the line colour, is the same in both. Resting HR's reversed scale (js/panels.js) follows, so a lower resting HR
+     is the more prominent colour in both themes. */
+  --green-0: #0f4a24; --green-1: #237a3c; --green-2: #43a55a; --green-3: #7bcc80; --green-4: #b5e3b5;
+  --purple-0: #4329a6; --purple-1: #6a55cf; --purple-2: #8f7fe3; --purple-3: #b9adf2; --purple-4: #ddd7fa;
+  --blue-0: #123f86; --blue-1: #2f6fc4; --blue-2: #5d9ae2; --blue-3: #94c0f2; --blue-4: #c9dffa;
+  --red-0: #8c1d12; --red-1: #c9402f; --red-2: #e8705f; --red-3: #f5a59b; --red-4: #fcd5d0;
+  --teal-0: #125953; --teal-1: #2a8c83; --teal-2: #52b9ae; --teal-3: #8fd6cd; --teal-4: #c4ebe6;
+  --orange-0: #9a4d08; --orange-1: #d97a1c; --orange-2: #f09a4a; --orange-3: #f9bd85; --orange-4: #fde0c2;
+
+  /* a step brighter than LINE_STEP, mirroring light mode's step darker. Strength keeps its light pink: any dimmer pink
+     sits too close to base's teal for deuteranopes (it is the lightness gap that keeps them apart), so on a dark page
+     strength is about as bright as this line rather than softer than it. The run types and race all clear 3:1 against
+     the dark background as they are. */
+  --run-line: #7bcc80;
+}

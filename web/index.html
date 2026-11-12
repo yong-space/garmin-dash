@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Fitness Dash</title>
+<script>
+  // Theme before first paint, so the page never flashes the wrong one: the one picked with the theme button (saved by
+  // js/theme.js), else, if it has never been used, the device's preference. js/theme.js takes over from here.
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem("theme"); } catch (e) {}
+    if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;800&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/toolbar.css">
+<link rel="stylesheet" href="css/panels.css">
+<link rel="stylesheet" href="css/heatmap.css">
+<link rel="stylesheet" href="css/linechart.css">
+<link rel="stylesheet" href="css/tooltip.css">
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<main data-mode="heat">
+  <header class="top">
+    <h1>Fitness Dash</h1>
+    <button type="button" class="theme" id="theme" aria-label="Switch theme">
+      <svg class="i-light" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <circle cx="8" cy="8" r="3" fill="currentColor"/>
+        <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <path d="M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/>
+        </g>
+      </svg>
+      <svg class="i-dark" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <path d="M13.5 10.2A6 6 0 0 1 5.8 2.5a6 6 0 1 0 7.7 7.7z" fill="currentColor"/>
+      </svg>
+    </button>
+  </header>
+  <div class="toolbar">
+    <div class="toggle mode" role="group" aria-label="Chart type">
+      <button type="button" data-mode="heat" title="Heatmap" aria-pressed="true">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <rect x="1" y="1" width="4" height="4" rx="1" fill="currentColor" opacity="0.35"/>
+          <rect x="6" y="1" width="4" height="4" rx="1" fill="currentColor" opacity="0.65"/>
+          <rect x="11" y="1" width="4" height="4" rx="1" fill="currentColor" opacity="1"/>
+          <rect x="1" y="6" width="4" height="4" rx="1" fill="currentColor" opacity="0.65"/>
+          <rect x="6" y="6" width="4" height="4" rx="1" fill="currentColor" opacity="1"/>
+          <rect x="11" y="6" width="4" height="4" rx="1" fill="currentColor" opacity="0.35"/>
+          <rect x="1" y="11" width="4" height="4" rx="1" fill="currentColor" opacity="1"/>
+          <rect x="6" y="11" width="4" height="4" rx="1" fill="currentColor" opacity="0.35"/>
+          <rect x="11" y="11" width="4" height="4" rx="1" fill="currentColor" opacity="0.65"/>
+        </svg><span class="visually-hidden">Heatmap</span>
+      </button>
+      <button type="button" data-mode="line" title="Line" aria-pressed="false">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <polyline points="1.5,12 5.5,7 9,9.5 14.5,3" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+        </svg><span class="visually-hidden">Line</span>
+      </button>
+    </div>
+    <div class="toggle" id="horizons" role="group" aria-label="Time horizon"></div>
+    <div class="toggle" id="granularity" role="group" aria-label="Line chart granularity"></div>
+    <span class="range" id="range"></span>
+  </div>
+  <div id="view"><p class="status">Loading…</p></div>
+</main>
+<div id="tip" role="tooltip" hidden></div>
+</body>
+</html>

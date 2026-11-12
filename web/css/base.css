@@ -1,0 +1,26 @@
+/* Page-wide typography and layout. Colours are in theme.css. */
+
+:root { --mono: "IBM Plex Mono", ui-monospace, monospace; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: Archivo, system-ui, sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 24px; }
+h1 { font-weight: 800; font-size: 34px; margin: 0; letter-spacing: -0.01em; }
+/* the title, with the theme button at the right of its line */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+/* visually hidden, still read by screen readers */
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.status { color: var(--label); font-size: 14px; }
+.status.error { color: var(--error); }
+
+@media (max-width: 700px) {
+  h1 { font-size: 26px; }
+}
+@media (max-width: 480px) {
+  main { padding: 24px 16px 20px; }
+}
+
+/* charts for the previous horizon while the next one loads; the delay keeps fast loads from flickering */
+#view[aria-busy="true"] { opacity: 0.45; transition: opacity 0.15s 0.2s; }

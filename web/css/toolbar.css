@@ -1,0 +1,39 @@
+/* Chart-type and horizon toggles, then the date range (heatmap mode) or the granularity toggle (line mode). */
+
+.toolbar { display: flex; align-items: center; gap: 14px; margin: 14px 0 22px; } /* one line: the range shrinks first */
+.toggle { display: inline-flex; flex-shrink: 0; gap: 2px; background: var(--empty); border-radius: 8px; padding: 3px; }
+.toggle button {
+  font-family: var(--mono); font-size: 12px; color: var(--label); background: none; border: 0;
+  padding: 5px 14px; border-radius: 6px; cursor: pointer; user-select: none;
+}
+.toggle.mode button { display: flex; align-items: center; padding: 5px 9px; }
+.toggle button[aria-pressed="true"] { background: var(--raised); color: var(--ink); box-shadow: 0 1px 2px var(--shadow); }
+
+/* Theme button (js/theme.js), right of the title: shows the current theme's icon, switches to the other on click. */
+.theme {
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 34px; height: 34px; padding: 0;
+  border: 0; border-radius: 8px; background: var(--empty); color: var(--label); cursor: pointer;
+  margin-block: -6px; /* taller than the phone title's line: overhang it rather than push the page down */
+}
+.theme:hover { color: var(--ink); }
+.theme:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.theme svg { display: none; }
+/* keyed off <html>'s theme, which is set before first paint, so the icon is right before any script module runs */
+:root[data-theme="light"] .theme .i-light, :root[data-theme="dark"] .theme .i-dark { display: block; }
+.toggle button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.range { min-width: 0; color: var(--label); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#granularity button { padding: 5px 10px; }
+.toggle button[hidden] { display: none; } /* a granularity this horizon doesn't offer */
+
+/* main[data-mode] is set by main.js: each mode shows only its own controls */
+main[data-mode="heat"] #granularity,
+main[data-mode="heat"] .line-only,
+main[data-mode="line"] .range { display: none; }
+
+/* Phones: tighter buttons so the whole toolbar (mode, five horizons, two granularities) fits one row at 360px. */
+@media (max-width: 480px) {
+  .toolbar { gap: 8px; }
+  .toggle button, #granularity button { padding: 5px 8px; }
+  .toggle.mode button { padding: 5px 6px; }
+  .range { font-size: 12px; }
+}

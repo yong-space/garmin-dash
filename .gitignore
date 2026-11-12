@@ -1,0 +1,6 @@
+__pycache__
+garmin_cache.json
+garmin_cache.json.*
+lactate_threshold.csv
+*.local.yaml
+demo/

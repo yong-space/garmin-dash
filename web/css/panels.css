@@ -1,0 +1,45 @@
+/* Panel layout, headlines and the legend row shared by both chart types. */
+
+/* Panels stack full-width, or sit in two columns when the current mode's charts are short enough: heat-two-col
+   (up to TWO_COLUMN_MAX_WEEKS weeks) in heatmap mode, line-two-col (up to LINE_TWO_COLUMN_MAX_POINTS points) in
+   line mode. Below 1024px two columns get too narrow to read, so the panels always stack. */
+.panels { display: grid; gap: 26px 44px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1024px) {
+  main[data-mode="heat"] .panels.heat-two-col,
+  main[data-mode="line"] .panels.line-two-col { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+
+/* Each panel holds both chart types; show the one for the current mode (main[data-mode], set by main.js). */
+main[data-mode="heat"] .line,
+main[data-mode="line"] .heat,
+main[data-mode="heat"] .for-line,
+main[data-mode="line"] .for-heat { display: none; } /* headline text that differs by mode (the run average's period) */
+
+h2 { margin: 0 0 8px; font-weight: 400; font-size: 15px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+/* a secondary stat at the right of the headline (e.g. total distance): same baseline, quieter than the big number */
+.aside { flex-shrink: 0; color: var(--muted); font-size: 13px; white-space: nowrap; }
+.aside-value { font-weight: 800; font-size: 20px; letter-spacing: -0.01em; color: var(--ink); }
+.big { font-weight: 800; font-size: 30px; letter-spacing: -0.01em; margin-right: 6px; }
+.note { color: var(--muted); font-size: 13px; }
+
+.legend { display: flex; align-items: center; gap: 4px; margin-top: 10px; font-family: var(--mono); font-size: 11px; color: var(--label); }
+/* A long press on a legend entry highlights its series (js/series.js): never select its text or open the callout. */
+.legend { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.sw { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+.gap { width: 16px; display: inline-block; }
+/* Legend entries that are buttons hide/show their series (js/series.js), in both chart types. */
+.legend .li {
+  display: inline-flex; align-items: center; gap: 4px; font: inherit; color: inherit; background: none; border: 0;
+  padding: 4px 2px; margin: -4px -2px; border-radius: 4px; cursor: pointer;
+}
+.legend .li:hover { color: var(--ink); }
+.legend .li:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.legend .li[aria-pressed="false"] { opacity: .4; text-decoration: line-through; }
+.legend .lk { display: inline-flex; align-items: center; gap: 4px; } /* a plain key entry, laid out like the buttons */
+
+/* Legend hover focus (js/series.js): marks of other series fade while one legend entry is hovered. */
+[data-k] { transition: opacity .2s ease; }
+.focusing [data-k]:not(.on) { opacity: .15; }
+@media (prefers-reduced-motion: reduce) { [data-k] { transition: none; } }
+.star, .cell.star > span { border-radius: 0; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+.legend .sw.star { transform: scale(1.45); margin: 0 2px; } /* a star fills far less of its box than a square: enlarge to match visually, with room for its points */

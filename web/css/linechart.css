@@ -1,0 +1,19 @@
+/* Line charts (SVG from js/linechart.js) and their clickable legend. */
+
+.chart { display: block; overflow: visible; }
+.chart text { font-family: var(--mono); font-size: 11px; fill: var(--label); }
+.chart .gl { stroke: var(--gridline); stroke-width: 1; }
+.chart .hit { fill: transparent; }
+/* a ring of page colour around race stars, so a line running into one reads as passing behind it */
+.chart .race-star { stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; paint-order: stroke; }
+
+/* Three SVGs drawn 1:1 at the panel's width (see main.js): pinned y-axes either side of the plot. A plot drawn
+   wider than its panel (long horizons on phones) pans sideways between the axes. */
+.lc { display: flex; }
+.lc > svg { flex: none; }
+.lcs { flex: 1 1 0; min-width: 0; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; } /* pans sideways only (see heatmap.css) */
+.lcs::-webkit-scrollbar { display: none; }
+
+/* Line legend swatch; hidden line series (js/series.js adds off-<key> to the chart). */
+.ln { width: 14px; height: 2px; border-radius: 1px; display: inline-block; }
+.line.off-s0 .s0, .line.off-s1 .s1, .line.off-sr .sr { display: none; }

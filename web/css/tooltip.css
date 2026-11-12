@@ -1,0 +1,22 @@
+/* The floating tooltip (js/tooltip.js): at the hovered point, or pinned to a clicked or tapped one. */
+
+#tip {
+  position: fixed; z-index: 10; pointer-events: none; max-width: min(380px, calc(100vw - 16px)); padding: 10px 14px;
+  border-radius: 10px; background: var(--tip-bg); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  color: var(--tip-ink); font-size: 16px; line-height: 1.45; white-space: pre-line; box-shadow: 0 4px 16px var(--tip-shadow);
+}
+#tip[hidden] { display: none; }
+#tip .d { font-family: var(--mono); font-size: 13px; color: var(--tip-date); margin-bottom: 3px; }
+
+/* The active point, in every chart: a band on line charts (darker once pinned), an outlined cell on heatmaps (race
+   days too: their star is an inner element, so the cell's square outline isn't clipped). */
+.chart .hit.sel { fill: var(--hit); }
+.pinned .chart .hit.sel { fill: var(--hit-pinned); }
+.cell.sel { outline: 2px solid var(--ink); outline-offset: 1px; position: relative; z-index: 1; }
+
+/* Each panel's readout line: the active point's summary in that panel, blank otherwise. Its line is always
+   reserved, so activating a point never shifts the page. */
+.readout {
+  min-height: 1.45em; margin: -2px 0 8px; font-family: var(--mono); font-size: 14px; line-height: 1.45; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
